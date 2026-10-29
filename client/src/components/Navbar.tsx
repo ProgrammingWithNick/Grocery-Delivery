@@ -5,12 +5,16 @@ import {
   BikeIcon,
   LayoutDashboardIcon,
   LogOutIcon,
+  MapPinIcon,
   MenuIcon,
   PackageIcon,
   SearchIcon,
+  ShoppingBagIcon,
   ShoppingCartIcon,
+  TagIcon,
   XIcon,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 type User = {
   name: string
@@ -18,13 +22,19 @@ type User = {
   isAdmin: boolean
 }
 
+type MenuItem = {
+  to: string
+  label: string
+  icon: LucideIcon
+}
+
 const Navbar = () => {
   // Dummy data - replace with your real auth / cart state
-  const user: User | null = {
+  const user = {
     name: "John Doe",
     email: "john.doe@example.com",
     isAdmin: true,
-  }
+  } as User | null
   const cartCount = 5
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -33,15 +43,36 @@ const Navbar = () => {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
-  // Close user dropdown when clicking outside of it
+  // Items shown inside the user dropdown
+  const userMenuItems: MenuItem[] = [
+    { to: "/orders", label: "My Orders", icon: PackageIcon },
+    { to: "/addresses", label: "Addresses", icon: MapPinIcon },
+    { to: "/products", label: "Products", icon: ShoppingBagIcon },
+    { to: "/deals", label: "Deals", icon: TagIcon },
+    ...(user?.isAdmin
+      ? [{ to: "/admin/products", label: "Admin Dashboard", icon: LayoutDashboardIcon }]
+      : []),
+  ]
+
+  // Close user dropdown on outside click or Escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false)
       }
     }
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setUserMenuOpen(false)
+        setMobileMenuOpen(false)
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleEscape)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleEscape)
+    }
   }, [])
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
@@ -55,6 +86,7 @@ const Navbar = () => {
   const handleLogout = () => {
     // Replace with your real logout logic
     setUserMenuOpen(false)
+    setMobileMenuOpen(false)
     navigate("/login")
   }
 
@@ -141,23 +173,16 @@ const Navbar = () => {
                       <p className="text-xs text-zinc-500 truncate">{user.email}</p>
                     </div>
 
-                    <Link
-                      to="/orders"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-zinc-700 hover:bg-zinc-50"
-                    >
-                      <PackageIcon className="size-4" /> My Orders
-                    </Link>
-
-                    {user.isAdmin && (
+                    {userMenuItems.map(({ to, label, icon: Icon }) => (
                       <Link
-                        to="/admin"
+                        key={to}
+                        to={to}
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-zinc-700 hover:bg-zinc-50"
                       >
-                        <LayoutDashboardIcon className="size-4" /> Admin Dashboard
+                        <Icon className="size-4" /> {label}
                       </Link>
-                    )}
+                    ))}
 
                     <button
                       type="button"
@@ -172,7 +197,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="hidden sm:inline-block px-4 py-2 rounded-full bg-app-green text-white text-sm font-medium hover:bg-app-green-dark transition-colors"
+                className="inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-app-green text-white text-xs sm:text-sm font-medium hover:bg-app-green-dark transition-colors"
               >
                 Login
               </Link>
@@ -198,23 +223,36 @@ const Navbar = () => {
           {searchForm("flex")}
 
           <div className="flex flex-col gap-3 text-sm text-zinc-700">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)}>
-              Home
-            </Link>
-            <Link to="/products" onClick={() => setMobileMenuOpen(false)}>
-              Products
-            </Link>
-            <Link
-              to="/deals"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-app-orange"
-            >
-              Deals
-            </Link>
-            {!user && (
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                Login
-              </Link>
+            
+
+            {user ? (
+              // logged in: My Orders, Addresses, Products, Deals, (Admin)
+              userMenuItems.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-2 ${
+                    to === "/deals" ? "text-app-orange" : ""
+                  }`}
+                >
+                  <Icon className="size-4" /> {label}
+                </Link>
+              ))
+            ) : (
+              // logged out: Products, Deals
+              <>
+                <Link to="/products" onClick={() => setMobileMenuOpen(false)}>
+                  Products
+                </Link>
+                <Link
+                  to="/deals"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-app-orange"
+                >
+                  Deals
+                </Link>
+              </>
             )}
           </div>
         </div>
