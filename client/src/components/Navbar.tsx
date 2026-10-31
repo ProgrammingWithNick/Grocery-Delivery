@@ -15,6 +15,7 @@ import {
   XIcon,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { useCart } from "../context/CartContext"
 
 type User = {
   name: string
@@ -35,7 +36,7 @@ const Navbar = () => {
     email: "john.doe@example.com",
     isAdmin: true,
   } as User | null
-  const cartCount = 5
+  const { cartCount, setIsCartOpen } = useCart()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -143,7 +144,7 @@ const Navbar = () => {
               type="button"
               aria-label="Open cart"
               className="relative p-2 rounded-xl hover:bg-zinc-100 transition-colors"
-              onClick={() => navigate("/cart")}
+              onClick={() => setIsCartOpen(true)}
             >
               <ShoppingCartIcon className="size-5 text-zinc-900" />
               {cartCount > 0 && (
@@ -223,7 +224,9 @@ const Navbar = () => {
           {searchForm("flex")}
 
           <div className="flex flex-col gap-3 text-sm text-zinc-700">
-            
+            <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+              Home
+            </Link>
 
             {user ? (
               // logged in: My Orders, Addresses, Products, Deals, (Admin)

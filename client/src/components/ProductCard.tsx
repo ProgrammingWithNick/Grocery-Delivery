@@ -2,11 +2,12 @@ import type { MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { PlusIcon, StarIcon } from "lucide-react"
 import type { Product } from "../types"
+import { useCart } from "../context/CartContext"
 
 const ProductCard = ({ product }: { product: Product }) => {
   const currencySymbol = import.meta.env.VITE_CURRENCY_SYMBOL || "₹"
   // Dummy cart function - replace with your real cart context
-  const { addToCart } = { addToCart: (_product: Product) => {} }
+  const { addToCart } = useCart()
   const navigate = useNavigate()
 
   const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
