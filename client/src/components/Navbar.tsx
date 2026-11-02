@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import type { FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   BikeIcon,
   LayoutDashboardIcon,
@@ -43,6 +43,9 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  // the search page has its own big search bar, so hide the navbar one there
+  const onSearchPage = pathname.startsWith("/search")
 
   // Items shown inside the user dropdown
   const userMenuItems: MenuItem[] = [
@@ -80,7 +83,7 @@ const Navbar = () => {
     e.preventDefault()
     const q = searchQuery.trim()
     if (!q) return
-    navigate(`/products?search=${encodeURIComponent(q)}`)
+    navigate(`/search?q=${encodeURIComponent(q)}`)
     setMobileMenuOpen(false)
   }
 
@@ -105,6 +108,17 @@ const Navbar = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        {/* clear button (only when there is text) */}
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery("")}
+            aria-label="Clear search"
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center size-5 rounded-full bg-zinc-300/70 text-white hover:bg-app-orange active:scale-90 transition-all"
+          >
+            <XIcon className="size-3" strokeWidth={3} />
+          </button>
+        )}
       </div>
     </form>
   )
@@ -135,7 +149,7 @@ const Navbar = () => {
           </div>
 
           {/* search (tablet and up) */}
-          {searchForm("hidden md:flex flex-1 max-w-sm")}
+          {!onSearchPage && searchForm("hidden md:flex flex-1 max-w-sm")}
 
           {/* right actions */}
           <div className="flex items-center gap-1 sm:gap-3">
@@ -221,7 +235,7 @@ const Navbar = () => {
       {/* mobile menu panel */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-app-border bg-white px-4 py-4 space-y-4">
-          {searchForm("flex")}
+          {!onSearchPage && searchForm("flex")}
 
           <div className="flex flex-col gap-3 text-sm text-zinc-700">
             <Link to="/" onClick={() => setMobileMenuOpen(false)}>
@@ -235,9 +249,8 @@ const Navbar = () => {
                   key={to}
                   to={to}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-2 ${
-                    to === "/deals" ? "text-app-orange" : ""
-                  }`}
+                  className={`flex items-center gap-2 ${to === "/deals" ? "text-app-orange" : ""
+                    }`}
                 >
                   <Icon className="size-4" /> {label}
                 </Link>
