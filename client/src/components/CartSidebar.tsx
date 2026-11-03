@@ -12,7 +12,7 @@ import { useCart } from "../context/CartContext"
 
 // Delivery rules (change these to match your store / currency)
 const FREE_DELIVERY_MIN = 20
-const DELIVERY_FEE = 1.99
+const DELIVERY_FEE = 2.00
 
 const CartSidebar = () => {
   const currencySymbol = import.meta.env.VITE_CURRENCY_SYMBOL || "₹"
