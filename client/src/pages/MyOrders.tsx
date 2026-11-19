@@ -63,7 +63,6 @@ const MyOrders = () => {
         }
       </div>
 
-
     </div>
   )
 }
