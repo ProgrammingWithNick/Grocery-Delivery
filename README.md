@@ -1,7 +1,7 @@
 # Grocery Delivery
 
 A full-stack grocery delivery website built using the MERN stack.
-FreshKart – Online Grocery Delivery Website
+FreshKart – Online Grocery Delivery Website.
 
 ## Technologies
 - React.js
